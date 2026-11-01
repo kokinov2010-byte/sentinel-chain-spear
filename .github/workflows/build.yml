@@ -12,18 +12,23 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-    - name: Unzip and Move Files
+    - name: Unzip project archive
       run: |
-        unzip -q "*.zip" -d extracted_project
-        TARGET_DIR=$(find extracted_project -name "build.gradle" -exec dirname {} \;)
-        if [ -n "$TARGET_DIR" ]; then
-          cp -r $TARGET_DIR/* .
+        mkdir -p unpacked
+        unzip -q "*.zip" -d unpacked/
+        # Проверяем, куда распаковались файлы, и переносим их в корень проекта
+        INNER_DIR=$(find unpacked -name "build.gradle" -exec dirname {} \;)
+        if [ -z "$INNER_DIR" ]; then
+          INNER_DIR="unpacked"
         fi
-        rm -rf extracted_project
+        cp -r $INNER_DIR/* . || true
+        rm -rf unpacked
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Build with Gradle
-      run: chmod +x gradlew && ./gradlew build
+    - name: Build mod package
+      run: |
+        chmod +x gradlew || true
+        ./gradlew build --no-daemon
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
