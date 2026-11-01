@@ -15,7 +15,6 @@ jobs:
     - name: Unzip and Move Files
       run: |
         unzip -q "*.zip" -d extracted_project
-        # Ищем, где лежит build.gradle, и переносим всё содержимое этой папки в корень
         TARGET_DIR=$(find extracted_project -name "build.gradle" -exec dirname {} \;)
         if [ -n "$TARGET_DIR" ]; then
           cp -r $TARGET_DIR/* .
