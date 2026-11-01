@@ -7,28 +7,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    
     - name: Set up JDK 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
-    - name: Unzip project archive
+        
+    - name: Unzip Archive Cleanly
       run: |
-        mkdir -p unpacked
-        unzip -q "*.zip" -d unpacked/
-        # Проверяем, куда распаковались файлы, и переносим их в корень проекта
-        INNER_DIR=$(find unpacked -name "build.gradle" -exec dirname {} \;)
-        if [ -z "$INNER_DIR" ]; then
-          INNER_DIR="unpacked"
-        fi
-        cp -r $INNER_DIR/* . || true
-        rm -rf unpacked
+        # Используем Python, чтобы безопасно распаковать архив прямо в корень проекта
+        python3 -c "import zipfile, glob; zip = zipfile.ZipFile(glob.glob('*.zip')[0]); zip.extractall('.')"
+        # Проверяем, что файлы появились
+        ls -la
+        
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Build mod package
+      
+    - name: Build Mod Package
       run: |
         chmod +x gradlew || true
         ./gradlew build --no-daemon
+        
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
