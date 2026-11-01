@@ -16,17 +16,19 @@ jobs:
         
     - name: Unzip Archive Cleanly
       run: |
-        # Используем Python, чтобы безопасно распаковать архив прямо в корень проекта
-        python3 -c "import zipfile, glob; zip = zipfile.ZipFile(glob.glob('*.zip')[0]); zip.extractall('.')"
-        # Проверяем, что файлы появились
-        ls -la
+        python3 -c "import zipfile, glob; zip = zipfile.ZipFile(glob.glob('*.zip')); zip.extractall('.')"
+        
+    - name: Generate Missing Gradle Wrapper
+      run: |
+        # Эта команда принудительно создаёт недостающий gradlew прямо на сервере
+        gradle wrapper --gradle-version 8.7
         
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       
     - name: Build Mod Package
       run: |
-        chmod +x gradlew || true
+        chmod +x gradlew
         ./gradlew build --no-daemon
         
     - name: Upload Artifact
